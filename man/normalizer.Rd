@@ -35,7 +35,8 @@ The function will apply eigth different transformations to the data:
 \item Box Cox
 \item Logarithm in the base 10
 \item Inverse (1 / x)
-\item Inverse Natural logarithm
+\item Inverse Natural logarithm (revert the data, apply a natural logarithm
+and then invert it back)
 \item Tukey Ladder of Powers (if the vector is between 3 and 5000 long)
 }
 The \code{normalizer} function uses the standardized D value calculated by a
