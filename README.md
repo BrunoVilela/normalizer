@@ -4,7 +4,7 @@
 
 Install and load devtools:
 ```
-install.packages(devtools)
+install.packages("devtools")
 library(devtools)
 ```
 Install the package from github:

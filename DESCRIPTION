@@ -4,8 +4,7 @@ Title: Making data normal again.
 Version: 0.1.0
 Author: Bruno Vilela
 Maintainer: Bruno Vilela <brunovilelasilva@hotmail.com>
-Description: Apply several data normalization and indicates the 
-best one for the data.
+Description: Apply several data normalization and indicates the best one for the data.
 License: GPL-2
 Imports:
     MASS,

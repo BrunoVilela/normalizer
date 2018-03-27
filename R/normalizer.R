@@ -1,11 +1,11 @@
 #' Function to normalize distributions
 #'
 #'@description The function will apply several transformations,
-#'and indicate the transformation that approximates more a normal distribution.
+#'and indicate the transformation that best approximates a normal distribution.
 #'
 #'@param x a numeric vector without absent data.
-#'@param plotit Boolean.
-#'@param return_all Boolean. If TRUE it will return all values.
+#'@param plotit Logical If TRUE histograms of each transformation will be ploted.
+#'@param return_all Logical. If TRUE it will return all values.
 #'Default is FALSE, and only the selected vector is returned.
 #'@param ... Other parameters passed to the \code{hist} function.
 #'
