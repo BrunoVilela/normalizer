@@ -1,15 +1,62 @@
 #' Function to normalize distributions
 #'
-#'@param x a vector.
+#'@description The function will apply several transformations,
+#'and indicate the transformation that approximates more a normal distribution.
+#'
+#'@param x a numeric vector without absent data.
 #'@param plotit Boolean.
+#'@param return_all Boolean. If TRUE it will return all values.
+#'Default is FALSE, and only the selected vector is returned.
+#'@param ... Other parameters passed to the \code{hist} function.
+#'
+#'@details
+#'The function will apply eigth different transformations to the data:
+#'\enumerate{
+#'\item Square root
+#'\item Natural logarithm
+#'\item Cube root
+#'\item Box Cox
+#'\item Logarithm in the base 10
+#'\item Inverse (1 / x)
+#'\item Inverse Natural logarithm
+#'\item Tukey Ladder of Powers (if the vector is between 3 and 5000 long)
+#'}
+#'The \code{normalizer} function uses the standardized D value calculated by a
+#' Kolmogorov-Smirnov test using the function \code{stats::ks.test} to determine
+#' the transformation that most approximate a normal distribution.
+#'
+#'@author Bruno Vilela {bvilela at wustl.edu}
+#'
+#'@return The function will return a transformed vector (or the raw data) that is
+#'closer to a normal distribution and the D value.
+#' If \code{return_all} equals TRUE, than a list with all transformations
+#' is returned.
 #'
 #'@examples
 #' library(letsR)
 #' x <- as.vector(na.exclude(values(temp)))
 #' x <- x / 100
-#' x_t <- normalizer(x, plotit = TRUE)
+#' x_t <- normalizer(x, plotit = TRUE, return_all = TRUE)
+#'
+#' library(datasets)
+#' data(mtcars)
+#' test <- normalizer(mtcars$mpg, plotit = TRUE, return_all = TRUE)
+#' test2 <- normalizer(mtcars$disp, plotit = TRUE, return_all = FALSE)
 
-normalizer <- function(x, plotit = FALSE) {
+normalizer <- function(x, plotit = FALSE,
+                       return_all = FALSE,
+                       ...) {
+
+  if (!is.numeric(x) | !is.vector(x)) {
+    stop("x is not a numeric vector")
+  }
+  if (any(is.na(x)) | any(is.infinite(x)) | any(is.nan(x))) {
+    stop("x contains NA, NANs or infinite values")
+  }
+
+  if (!is.logical(plotit)) {
+    stop("plotit is not logical")
+  }
   if (any(x < 0)) {
     x1 <- x + abs(min(x)) + 1
   } else {
@@ -25,6 +72,7 @@ normalizer <- function(x, plotit = FALSE) {
   Cox <- data.frame(Box$x, Box$y)
   Cox2 <- Cox[with(Cox, order(-Cox$Box.y)),]
   lambda <- Cox2[1, "Box.x"]
+  lambda <- ifelse(lambda == 0, 0.000001, lambda)
   trans[[5]] <- (x1 ^ lambda - 1) / lambda
   # Inverse
   trans[[6]] <- 1 / x1
@@ -36,10 +84,15 @@ normalizer <- function(x, plotit = FALSE) {
   trans[[8]] <- log(inv2) * -1
 
   if (length(x1) < 5000 & length(x1) > 3) {
+    f <- file()
+    sink(file = f)
     trans[[9]] <- rcompanion::transformTukey(x1, plotit = FALSE)
+    sink()
+    close(f)
   }
-
-  qual <- which.min(sapply(trans, .fitD))
+  trans2 <- lapply(trans, function(x){(x - mean(x)) / sd(x)})
+  likelihood <- sapply(trans2, .fitD)
+  qual <- which.min(likelihood)
 
   transformations <- c("raw",
                        "sqrt",
@@ -50,21 +103,31 @@ normalizer <- function(x, plotit = FALSE) {
                        "log10",
                        "inverse log",
                        "Tukey")
-  print(transformations[qual])
 
   if (plotit) {
     par(mfrow = c(3, 3))
     for (i in 1:length(trans)) {
-      hist(trans[[i]], 30,
+      hist(trans[[i]],
            main = transformations[i],
-           xlab = "")
+           xlab = "", ...)
     }
   }
-
-
-  return(trans[[qual]])
+  names(trans) <- transformations[1:length(trans)]
+  names(likelihood) <- transformations[1:length(trans)]
+  if (return_all) {
+    result <- list("Transformed_vectors" = trans, "D" = likelihood)
+    return(result)
+  } else {
+    result <- list(trans[[qual]], likelihood[qual])
+    names(result) <- c(transformations[[qual]], "D")
+    return(result)
+  }
 }
 .fitD <- function(z) {
-  MASS::fitdistr(z, "normal")$loglik
+  suppressWarnings(stats::ks.test(z, "pnorm")$statistic)
 }
 
+# .fitD <- function(z) {
+#   MASS::fitdistr(z, "normal")$loglik
+# }
+#

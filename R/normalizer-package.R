@@ -1,6 +1,6 @@
-#' @importFrom MASS fitdistr boxcox
+#' @importFrom MASS boxcox
 #' @importFrom rcompanion transformTukey
 #' @importFrom graphics par hist
 #' @importFrom methods slot
-#' @importFrom stats shapiro.test na.exclude
+#' @importFrom stats na.exclude ks.test
 NULL
