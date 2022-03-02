@@ -26,7 +26,7 @@
 #' Kolmogorov-Smirnov test using the function \code{stats::ks.test} to determine
 #' the transformation that most approximate a normal distribution.
 #'
-#'@author Bruno Vilela (email: \email{bvilela@wustl.edu})
+#'@author Bruno Vilela (email: \email{bvilela.bv@gmail.com})
 #'
 #'@return The function will return a list with transformed vector
 #'(or the raw data) that is closer to a normal distribution and the D value.
